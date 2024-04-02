@@ -31,4 +31,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create v${{ github.run_number }} dist/main-linux -t "Release v${{ github.run_number }} for Linux"
+          # create a release tag (if it doesn't exist)
+          git fetch --tags
+          if ! git rev-parse v${{ github.run_number }} >/dev/null 2>&1; then
+            git tag v${{ github.run_number }}
+            git push origin v${{ github.run_number }}
+          fi
+
+          # create a release
+          gh release upload v${{ github.run_number }} dist/main-linux --clobber
